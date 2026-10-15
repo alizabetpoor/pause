@@ -1,16 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiteHeader } from "@/components/studio/site-header";
 import { siteNavigation } from "@/components/studio/site-navigation";
-
 const heroSlides = [
   {
     title: "LAKAJA CAFE",
     location: "SARI",
     image: "/assets/figma/img62.png",
-    alt: "Lakaja Cafe at dusk, surrounded by its landscaped outdoor seating",
+    alt: "Lakaja Cafe at dusk",
   },
   {
     title: "NOOR GOLD GALLERY",
@@ -38,55 +37,75 @@ const heroSlides = [
   },
 ];
 
-const slideInterval = 5000;
+const SLIDE_INTERVAL = 5000;
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const slide = heroSlides[activeSlide];
+  // Use a ref so the interval callback never reads a stale value,
+  // even if React batches or defers the update.
+  const indexRef = useRef(0);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % heroSlides.length);
-    }, slideInterval);
+    indexRef.current = activeSlide;
+  }, [activeSlide]);
 
-    return () => window.clearInterval(intervalId);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const next = (indexRef.current + 1) % heroSlides.length;
+      indexRef.current = next;
+      setActiveSlide(next);
+    }, SLIDE_INTERVAL);
+
+    return () => {
+      window.clearInterval(id);
+    };
   }, []);
+
+  const slide = heroSlides[activeSlide] ?? heroSlides[0];
 
   return (
     <section
       id="home"
       aria-label={`Featured projects, slide ${activeSlide + 1} of ${heroSlides.length}`}
       aria-roledescription="carousel"
-      className="relative isolate h-svh min-h-[43rem] max-h-[64rem] overflow-hidden rounded-b-[26px] min-[1440px]:h-[64rem] min-[1440px]:max-h-none"
+      data-active-slide={activeSlide}
+      className="relative isolate h-svh w-full overflow-hidden rounded-b-[26px]"
     >
-      {heroSlides.map((item, index) => (
-        <div
-          key={item.image}
-          aria-hidden="true"
-          className={`absolute inset-0 -z-20 transition-opacity duration-700 ${index === activeSlide ? "opacity-100" : "opacity-0"}`}
-          style={{
-            maskImage: "url('/assets/figma/img61.svg')",
-            WebkitMaskImage: "url('/assets/figma/img61.svg')",
-            maskSize: "100% 100%",
-            WebkitMaskSize: "100% 100%",
-            maskRepeat: "no-repeat",
-            WebkitMaskRepeat: "no-repeat",
-          }}
-        >
+      {/* All slides stay mounted; only opacity changes. No remounting, so no
+          chance of the old frame getting stuck while the new one loads. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          maskImage: "url('/assets/figma/img61.svg')",
+          WebkitMaskImage: "url('/assets/figma/img61.svg')",
+          maskSize: "100% 100%",
+          WebkitMaskSize: "100% 100%",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+        }}
+      >
+        {heroSlides.map((item, i) => (
           <Image
+            key={item.image}
             src={item.image}
             alt=""
             fill
-            priority={index === 0}
+            priority={i === 0}
             sizes="100vw"
-            className="object-cover object-center opacity-40"
+            onError={() =>
+              console.error("[Hero] image failed to load:", item.image)
+            }
+            className={`object-cover object-center transition-opacity duration-700 ease-in-out ${
+              i === activeSlide ? "opacity-40" : "opacity-0"
+            }`}
           />
-        </div>
-      ))}
+        ))}
+      </div>
 
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-[rgba(217,217,217,0.2)] via-transparent to-[rgba(60,60,60,0.25)]"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[rgba(217,217,217,0.2)] via-transparent to-[rgba(60,60,60,0.25)]"
       />
 
       <SiteHeader links={siteNavigation} />
@@ -124,23 +143,31 @@ export function HeroSection() {
       <div
         role="group"
         aria-label="Choose featured project"
-        className="absolute bottom-6 right-[6.75%] z-10 flex items-center gap-2"
+        className="absolute right-[6.75%] bottom-6 z-30 flex items-center gap-2"
       >
-        {heroSlides.map((item, index) => (
-          <button
-            key={item.image}
-            type="button"
-            aria-label={`Show ${item.title}`}
-            aria-pressed={index === activeSlide}
-            onClick={() => setActiveSlide(index)}
-            className="flex h-8 w-[22px] items-center justify-center rounded-full"
-          >
-            <span
-              aria-hidden="true"
-              className={`size-[11px] rounded-full bg-white transition-opacity ${index === activeSlide ? "opacity-100" : "opacity-45 hover:opacity-80"}`}
-            />
-          </button>
-        ))}
+        {heroSlides.map((item, i) => {
+          const isActive = i === activeSlide;
+          return (
+            <button
+              key={item.image}
+              type="button"
+              aria-label={`Show ${item.title}`}
+              aria-pressed={isActive}
+              onClick={() => {
+                indexRef.current = i;
+                setActiveSlide(i);
+              }}
+              className="flex h-8 w-[22px] cursor-pointer items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <span
+                aria-hidden="true"
+                className={`size-[11px] rounded-full bg-white transition-opacity ${
+                  isActive ? "opacity-100" : "opacity-45 hover:opacity-80"
+                }`}
+              />
+            </button>
+          );
+        })}
       </div>
     </section>
   );
