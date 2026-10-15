@@ -22,7 +22,7 @@ export function ProjectCard({
 }: ProjectCardProps) {
   return (
     <article
-      className={`group relative isolate aspect-[382.71/455.755] w-[min(88vw,38rem)] shrink-0 snap-center overflow-hidden text-studio-white lg:w-full ${className ?? ""}`.trim()}
+      className={`group relative isolate aspect-[382.71/455.755] w-full overflow-hidden text-studio-white ${className ?? ""}`.trim()}
       style={
         maskImage
           ? {
@@ -41,10 +41,10 @@ export function ProjectCard({
         alt={imageAlt}
         fill
         sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 33vw"
-        className="-z-20 object-cover opacity-60 transition-transform duration-500 group-hover:scale-[1.03]"
+        className="-z-20 object-cover opacity-80 transition-transform duration-500 group-hover:scale-[1.03] xl:opacity-60"
       />
       <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-        <h3 className="font-display text-2xl leading-tight sm:text-3xl lg:text-[36px]">{title}</h3>
+        <h3 className="font-display text-3xl leading-tight sm:text-4xl xl:text-[36px]">{title}</h3>
         <Image
           src="/assets/figma/imgVector10.svg"
           alt=""
@@ -52,10 +52,10 @@ export function ProjectCard({
           height={2}
           className="mt-2 block h-auto max-w-full"
         />
-        <div className="mt-1 flex items-center gap-2 font-display text-[0.65rem] uppercase tracking-wide text-white/80 sm:text-xs lg:text-[20px]">
+        <div className="mt-1 flex items-center gap-2 font-display text-sm uppercase tracking-wide text-white/80 sm:text-base xl:text-[20px]">
           <span>{location}</span>
           <span aria-hidden="true">·</span>
-          <span className="lg:text-[17px]">{year}</span>
+          <span className="xl:text-[17px]">{year}</span>
         </div>
       </div>
     </article>

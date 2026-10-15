@@ -1,4 +1,4 @@
-import { ProjectCard } from "@/components/studio/project-card";
+import { ProjectCarousel } from "@/components/studio/project-carousel";
 import { TextLink } from "@/components/studio/text-link";
 
 const projects = [
@@ -50,13 +50,13 @@ const categories = ["RESIDENTIAL", "VILLAS", "COMMERCIAL", "INTERIOR"];
 
 export function ProjectsSection() {
   return (
-    <section id="projects" className="studio-container mt-20 sm:mt-28">
-      <p className="mx-auto max-w-5xl text-center font-display text-base leading-relaxed text-studio-white sm:text-xl lg:text-2xl">
+    <section id="projects" className="studio-container mt-10 sm:mt-20 xl:mt-28">
+      <p className="mx-auto max-w-5xl text-center font-display text-xs leading-relaxed text-studio-white sm:text-xl xl:text-2xl">
         From the first sketch to the final image, every stage is part of one
         integrated design process.
       </p>
 
-      <div className="mt-12 flex items-center justify-between gap-5 overflow-x-auto border-b border-studio-line pb-3 font-mono text-[0.6rem] uppercase tracking-[0.08em] sm:mt-16 sm:gap-8 sm:text-xs lg:text-sm">
+      <div className="mt-6 flex items-center justify-between gap-5 overflow-x-auto border-b border-studio-line pb-3 font-mono text-[0.6rem] uppercase tracking-[0.08em] sm:mt-12 sm:gap-8 sm:text-xs xl:mt-16 xl:text-sm">
         <div className="flex shrink-0 items-center gap-5 sm:gap-8">
           {categories.map((category) => (
             <span key={category} className="whitespace-nowrap">
@@ -72,15 +72,7 @@ export function ProjectsSection() {
         </TextLink>
       </div>
 
-      <div className="mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-6 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-[42px] lg:overflow-visible xl:grid-cols-[repeat(3,minmax(0,382.71px))] xl:justify-between">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.title}
-            {...project}
-            maskImage="/assets/figma/img41.svg"
-          />
-        ))}
-      </div>
+      <ProjectCarousel projects={projects} maskImage="/assets/figma/img41.svg" />
     </section>
   );
 }

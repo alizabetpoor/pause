@@ -56,16 +56,24 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section id="services" className="studio-container pt-14 sm:pt-20">
+    <section id="services" className="studio-container pt-12 sm:pt-20">
       <SectionIntro
         title="What We Do"
         description="We bring together architecture, technical design, visualization and visual communication to shape projects from the first idea to the final experience."
+        descriptionClassName="text-[0.7rem] sm:text-base"
       />
-      <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-8 sm:mt-16 sm:gap-x-8 sm:gap-y-12 lg:grid-cols-[repeat(3,minmax(0,304px))] lg:justify-between lg:gap-y-[3.25rem]">
+      <div className="mt-6 grid grid-cols-2 gap-x-2 gap-y-2 sm:mt-10 sm:gap-x-3 sm:gap-y-4 xl:mt-16 xl:grid-cols-[repeat(3,minmax(0,304px))] xl:justify-between xl:gap-y-[3.25rem]">
         {services.map((service) => (
           <ServiceCard
             key={service.number}
             {...service}
+            className={
+              service.number === "05"
+                ? "order-6 xl:order-5"
+                : service.number === "06"
+                  ? "order-5 xl:order-6"
+                  : undefined
+            }
             maskImage="/assets/figma/img11.svg"
           />
         ))}

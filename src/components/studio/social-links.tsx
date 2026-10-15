@@ -8,9 +8,12 @@ export type SocialLinkItem = {
 };
 
 const socialAssets: Record<SocialPlatform, { src: string; label: string }> = {
-  instagram: { src: "/assets/social-instagram.png", label: "Instagram" },
-  telegram: { src: "/assets/social-telegram.png", label: "Telegram" },
-  linkedin: { src: "/assets/social-linkedin.png", label: "LinkedIn" },
+  instagram: {
+    src: "/assets/figma/imgEntypoSocialInstagramWithCircle.svg",
+    label: "Instagram",
+  },
+  telegram: { src: "/assets/figma/imgGroup3.svg", label: "Telegram" },
+  linkedin: { src: "/assets/figma/imgVector.svg", label: "LinkedIn" },
 };
 
 type SocialLinksProps = {
@@ -30,7 +33,7 @@ export function SocialLinks({ links, className }: SocialLinksProps) {
               <a
                 href={href}
                 aria-label={asset.label}
-                className="inline-flex size-10 items-center justify-center rounded-full transition-opacity hover:opacity-70"
+                className="inline-flex size-10 items-center justify-center rounded-full transition-opacity hover:opacity-70 sm:size-14 xl:size-10"
               >
                 <Image
                   src={asset.src}
@@ -44,7 +47,7 @@ export function SocialLinks({ links, className }: SocialLinksProps) {
               <span
                 aria-label={asset.label}
                 role="img"
-                className="inline-flex size-10 items-center justify-center"
+                className="inline-flex size-10 items-center justify-center sm:size-14 xl:size-10"
               >
               <Image
                 src={asset.src}

@@ -96,7 +96,7 @@ export function HeroSection() {
             onError={() =>
               console.error("[Hero] image failed to load:", item.image)
             }
-            className={`object-cover object-center transition-opacity duration-700 ease-in-out ${
+            className={`object-cover object-[68%_center] transition-opacity duration-700 ease-in-out sm:object-center ${
               i === activeSlide ? "opacity-40" : "opacity-0"
             }`}
           />
@@ -108,10 +108,21 @@ export function HeroSection() {
         className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[rgba(217,217,217,0.2)] via-transparent to-[rgba(60,60,60,0.25)]"
       />
 
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[45%] backdrop-blur-[10px] sm:h-[52%] xl:hidden"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(60,60,60,0.38), rgba(60,60,60,0.08) 72%, transparent)",
+          maskImage: "linear-gradient(to bottom, transparent, black 24%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent, black 24%)",
+        }}
+      />
+
       <SiteHeader links={siteNavigation} />
 
-      <div className="studio-container absolute inset-x-0 bottom-[3%] z-10 flex flex-col items-start sm:bottom-[7%]">
-        <h1 className="font-display text-4xl leading-none text-white sm:text-5xl lg:text-[4rem]">
+      <div className="studio-container absolute inset-x-0 bottom-[3%] z-10 flex flex-col items-start pl-6 sm:bottom-[7%] sm:pl-4 xl:pl-0">
+        <h1 className="font-display text-4xl leading-none text-white sm:text-5xl xl:text-[4rem]">
           {slide.title}
         </h1>
         <div className="mt-4 flex items-center gap-3 sm:mt-5">

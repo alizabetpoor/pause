@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ExplorationCarousel } from "@/components/studio/exploration-carousel";
 import { SectionIntro } from "@/components/studio/section-intro";
 import { TextLink } from "@/components/studio/text-link";
 
@@ -13,7 +14,7 @@ const desktopPositions = [
   "left-0 top-0",
   "left-[440px] top-[240px]",
   "left-0 top-[638px]",
-  "left-[440px] top-[767px]",
+  "left-[440px] top-[867px]",
 ];
 
 function VerticalTitle({ className }: { className: string }) {
@@ -36,62 +37,52 @@ function VerticalTitle({ className }: { className: string }) {
 function ExplorationDescription() {
   return (
     <>
-      A collection of independent studies, design experiments, and
-      architectural explorations beyond commissioned work.
+      A collection of independent studies, design experiments, and architectural
+      explorations beyond commissioned work.
     </>
   );
 }
 
 export function AboutSection() {
   return (
-    <section id="about" className="studio-container mt-20 sm:mt-28">
+    <section id="about" className="studio-container mt-8 sm:mt-12 xl:mt-28">
       <Image
         src="/assets/figma/imgVector8.svg"
         alt=""
         width={1246}
         height={1}
-        className="block h-auto max-w-full"
+        className="hidden h-auto max-w-full xl:block"
       />
       <SectionIntro
         title="PAUSE STUDIO"
         description="We design contemporary spaces through simplicity, context, and thoughtful detail."
-        titleClassName="lg:text-[4rem]"
-        className="mt-16 sm:mt-20"
+        titleClassName="text-[2rem] sm:text-[2.5rem] xl:text-[4rem]"
+        descriptionClassName="text-sm sm:text-xl xl:text-lg"
+        className="mt-0 xl:mt-20"
       />
 
-      <div className="relative mt-16 min-h-[34rem] overflow-visible sm:mt-24 lg:min-h-[1400px]">
+      <div
+        aria-hidden="true"
+        className="mt-8 border-t border-studio-line xl:hidden"
+      />
+
+      <div className="relative mt-5 overflow-visible sm:mt-6 xl:mt-24 xl:min-h-[1400px]">
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 top-12 hidden h-[1376px] rounded-[30px] border border-white bg-[rgba(217,217,217,0.1)] lg:block"
+          className="absolute inset-x-0 top-12 hidden h-[1376px] rounded-[30px] border border-white bg-[rgba(217,217,217,0.1)] xl:block"
         />
 
-        <div className="relative z-10 grid min-h-[32rem] grid-cols-[3.5rem_1fr] gap-x-3 sm:grid-cols-[5rem_1fr] sm:gap-x-5 lg:hidden">
-          <VerticalTitle className="flex gap-1.5 self-start pt-3 font-display text-base leading-[0.95] sm:gap-3 sm:text-xl" />
-          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-5">
-            {explorationStudies.map((study) => (
-              <article
-                key={study.image}
-                className="relative h-[25rem] w-[min(72vw,20rem)] shrink-0 snap-center overflow-hidden rounded-[24px] border border-white/40"
-              >
-                <Image
-                  src={`/assets/figma/${study.image}`}
-                  alt={study.alt}
-                  fill
-                  sizes="72vw"
-                  className="object-cover opacity-70"
-                />
-                <h3 className="absolute left-4 top-4 font-display text-2xl text-white">
-                  . Conference Hall
-                </h3>
-              </article>
-            ))}
-          </div>
-          <p className="col-span-2 mt-5 max-w-2xl font-display text-xs leading-relaxed text-studio-white sm:text-sm">
+        <div className="relative min-h-[28rem] sm:min-h-[35rem] xl:hidden">
+          <VerticalTitle className="absolute top-[6.25rem] left-0 flex gap-1 font-display text-[2.5rem] leading-[0.9] text-white sm:top-24 sm:gap-4 sm:text-[3.25rem]" />
+          <p className="relative ml-9 max-w-2xl font-mono text-[0.7rem] leading-relaxed text-studio-white sm:ml-[8.75rem] sm:text-lg">
             <ExplorationDescription />
           </p>
+          <div className="ml-[4.5rem] mt-10 w-[calc(100%-5.5rem)] sm:ml-[8.75rem] sm:mt-8 sm:w-[calc(100%-8.75rem)]">
+            <ExplorationCarousel studies={explorationStudies} />
+          </div>
         </div>
 
-        <div className="relative hidden lg:block">
+        <div className="relative hidden xl:block">
           <VerticalTitle className="absolute left-0 top-0 flex h-[1048px] gap-8 font-display text-[6rem] leading-[90px] text-white" />
           <div className="absolute left-[34.2%] top-0 h-[1376px] w-[850px]">
             {explorationStudies.map((study, index) => (
@@ -118,10 +109,10 @@ export function AboutSection() {
         </div>
       </div>
 
-      <div className="mt-10 flex justify-end border-b border-studio-line pb-6 lg:mt-0">
+      <div className="mt-2 flex justify-end border-b border-studio-line pb-3 xl:mt-0 xl:pb-6">
         <TextLink href="#projects">VIEW ALL PROJECT</TextLink>
       </div>
-      <p className="mx-auto mt-12 max-w-5xl text-center font-display text-lg leading-relaxed sm:mt-16 sm:text-2xl">
+      <p className="mx-auto mt-6 max-w-5xl text-center font-display text-xs leading-relaxed sm:mt-10 sm:text-xl xl:mt-16 xl:text-2xl">
         PAUSE STUDIO is an architecture and design studio focused on creating
         thoughtful, contemporary spaces shaped by context, function, and detail.
       </p>

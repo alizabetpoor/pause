@@ -13,14 +13,14 @@ type SiteHeaderProps = {
 export function SiteHeader({ links }: SiteHeaderProps) {
   return (
     <header className="absolute inset-x-0 top-0 z-20">
-      <div className="studio-container flex h-24 items-start justify-between pt-6 sm:h-24 sm:pt-10">
+      <div className="studio-container flex h-20 items-start justify-between pt-6 sm:h-24 sm:pt-10">
         <a
           href="#home"
           aria-label="Pause Studio home"
-          className="flex shrink-0 items-start gap-1 text-white"
+          className="relative flex shrink-0 items-start gap-1 text-white"
         >
           <BrandMark width={160} className="h-auto w-40" />
-          <span className="mt-[1.1rem] font-mono text-[0.6rem] tracking-[0.12em] sm:text-sm">
+          <span className="absolute top-[2.65rem] left-2 font-mono text-[0.6rem] tracking-[0.12em] sm:static sm:mt-[1.1rem] sm:text-sm">
             STUDIO
           </span>
         </a>
