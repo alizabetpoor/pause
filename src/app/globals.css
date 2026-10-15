@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --studio-charcoal: #3c3c3c;
+  --studio-white: #ffffff;
+  --studio-muted: rgb(255 255 255 / 72%);
+  --studio-line: rgb(255 255 255 / 24%);
+  --studio-image-overlay: rgb(0 0 0 / 40%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-studio-charcoal: var(--studio-charcoal);
+  --color-studio-white: var(--studio-white);
+  --color-studio-muted: var(--studio-muted);
+  --color-studio-line: var(--studio-line);
+  --color-studio-image-overlay: var(--studio-image-overlay);
+  --font-sans: var(--font-ibm-plex-mono);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-display: var(--font-antic-didone);
+  --font-space: var(--font-space-mono);
+  --font-accent: var(--font-slackey);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--studio-charcoal);
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100%;
+  background: var(--studio-charcoal);
+  color: var(--studio-white);
+  font-family: var(--font-ibm-plex-mono), monospace;
+}
+
+::selection {
+  background: var(--studio-white);
+  color: var(--studio-charcoal);
+}
+
+:focus-visible {
+  outline: 1px solid var(--studio-white);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
