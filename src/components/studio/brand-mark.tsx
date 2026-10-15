@@ -10,7 +10,7 @@ export function BrandMark({ className, width = 160 }: BrandMarkProps) {
 
   return (
     <Image
-      src="/assets/pause-mark.png"
+      src="/assets/figma/imgShape3Copy1.png"
       alt="Pause Studio"
       width={width}
       height={height}

@@ -39,6 +39,24 @@ body {
   color: var(--studio-charcoal);
 }
 
+.studio-container {
+  width: calc(100% - 2rem);
+  max-width: 77.875rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .studio-container {
+    width: calc(100% - 4rem);
+  }
+}
+
+@media (min-width: 1280px) {
+  .studio-container {
+    width: min(77.875rem, calc(100% - 12rem));
+  }
+}
+
 :focus-visible {
   outline: 1px solid var(--studio-white);
   outline-offset: 4px;

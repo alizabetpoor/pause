@@ -7,6 +7,7 @@ type ServiceCardProps = {
   description: string;
   image: ImageProps["src"];
   imageAlt: string;
+  maskImage?: string;
   phase?: string;
   className?: string;
 };
@@ -17,38 +18,49 @@ export function ServiceCard({
   description,
   image,
   imageAlt,
+  maskImage,
   phase,
   className,
 }: ServiceCardProps) {
   return (
-    <article
-      className={`group relative isolate flex min-h-60 flex-col justify-between overflow-hidden rounded-xl border border-studio-line p-4 text-studio-white sm:p-5 ${className ?? ""}`.trim()}
-    >
-      <Image
-        src={image}
-        alt={imageAlt}
-        fill
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 45vw, 25vw"
-        className="-z-20 object-cover opacity-45 transition-transform duration-500 group-hover:scale-105"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/60 via-black/15 to-black/45"
-      />
-      <div>
-        <p className="font-display text-2xl leading-none sm:text-3xl">{number}</p>
-        <h3 className="mt-2 max-w-[14ch] font-display text-xl leading-tight sm:text-2xl">
+    <article className={`min-w-0 text-studio-white ${className ?? ""}`.trim()}>
+      <header className="min-h-[4.75rem] sm:min-h-[6.25rem]">
+        <p className="font-display text-lg leading-none sm:text-3xl lg:text-[36px]">{number}</p>
+        <h3 className="mt-1 max-w-[14ch] font-display text-[clamp(0.75rem,1.7vw,1.5rem)] leading-tight lg:text-[24px]">
           {title}
         </h3>
         {phase ? (
-          <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-wide text-studio-muted">
+          <p className="mt-1 font-display text-[0.65rem] leading-tight text-studio-white sm:text-sm lg:text-[24px]">
             {phase}
           </p>
         ) : null}
+      </header>
+      <div
+        className="group relative mt-2 aspect-[304/281] overflow-hidden"
+        style={
+          maskImage
+            ? {
+                maskImage: `url('${maskImage}')`,
+                WebkitMaskImage: `url('${maskImage}')`,
+                maskSize: "100% 100%",
+                WebkitMaskSize: "100% 100%",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+              }
+            : undefined
+        }
+      >
+        <Image
+          src={image}
+          alt={imageAlt}
+          fill
+          sizes="(max-width: 640px) 46vw, (max-width: 1024px) 42vw, 304px"
+          className="object-cover opacity-60 transition-transform duration-500 group-hover:scale-105"
+        />
+        <p className="absolute inset-x-3 top-3 font-display text-[clamp(0.55rem,1.5vw,1.375rem)] leading-[1.18] sm:inset-x-5 sm:top-5">
+          {description}
+        </p>
       </div>
-      <p className="mt-8 max-w-[36ch] font-display text-sm leading-relaxed sm:text-base">
-        {description}
-      </p>
     </article>
   );
 }

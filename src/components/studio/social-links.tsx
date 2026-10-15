@@ -4,7 +4,7 @@ export type SocialPlatform = "instagram" | "telegram" | "linkedin";
 
 export type SocialLinkItem = {
   platform: SocialPlatform;
-  href: string;
+  href?: string;
 };
 
 const socialAssets: Record<SocialPlatform, { src: string; label: string }> = {
@@ -26,11 +26,26 @@ export function SocialLinks({ links, className }: SocialLinksProps) {
 
         return (
           <li key={platform}>
-            <a
-              href={href}
-              aria-label={asset.label}
-              className="inline-flex size-10 items-center justify-center rounded-full transition-opacity hover:opacity-70"
-            >
+            {href ? (
+              <a
+                href={href}
+                aria-label={asset.label}
+                className="inline-flex size-10 items-center justify-center rounded-full transition-opacity hover:opacity-70"
+              >
+                <Image
+                  src={asset.src}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="size-full object-contain"
+                />
+              </a>
+            ) : (
+              <span
+                aria-label={asset.label}
+                role="img"
+                className="inline-flex size-10 items-center justify-center"
+              >
               <Image
                 src={asset.src}
                 alt=""
@@ -38,7 +53,8 @@ export function SocialLinks({ links, className }: SocialLinksProps) {
                 height={40}
                 className="size-full object-contain"
               />
-            </a>
+              </span>
+            )}
           </li>
         );
       })}
