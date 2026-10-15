@@ -97,6 +97,12 @@ export function AboutSection() {
                   sizes="410px"
                   className="object-cover opacity-80"
                 />
+                {index % 2 === 1 ? (
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-studio-charcoal/30"
+                  />
+                ) : null}
                 <h3 className="absolute left-5 top-5 font-display text-[2rem] text-white">
                   . Conference Hall
                 </h3>
