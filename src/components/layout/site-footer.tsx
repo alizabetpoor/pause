@@ -1,10 +1,6 @@
-import { BrandMark } from "@/components/studio/brand-mark";
-import { SocialLinks } from "@/components/studio/social-links";
-
-type SiteNavLink = {
-  label: string;
-  href: string;
-};
+import { BrandMark } from "@/components/ui/brand-mark";
+import { SocialLinks } from "@/components/ui/social-links";
+import type { SiteNavLink } from "@/components/layout/site-navigation";
 
 type SiteFooterProps = {
   links: SiteNavLink[];
@@ -27,7 +23,7 @@ export function SiteFooter({ links }: SiteFooterProps) {
           </p>
           <div className="mt-5 space-y-2 font-mono text-xs uppercase tracking-wide text-studio-muted sm:text-base xl:text-xs">
             <p>ARCHITECTURE STUDIO</p>
-            <p>TEHRAN , MAZANDARAN</p>
+            <p>SARI, MAZANDARAN</p>
             <p>WWW.PAUSESTUDIO@YAHOO.COM</p>
           </div>
         </div>
@@ -54,11 +50,24 @@ export function SiteFooter({ links }: SiteFooterProps) {
           <SocialLinks
             className="justify-center xl:justify-end"
             links={[
-              { platform: "linkedin" },
-              { platform: "telegram" },
-              { platform: "instagram" },
+              {
+                platform: "instagram",
+                href: "https://www.instagram.com/pause_studioo/",
+              },
             ]}
           />
+          <p className="mt-5 font-mono text-xs normal-case tracking-normal text-studio-muted sm:text-sm xl:text-[0.55rem]">
+            Developed by{" "}
+            <a
+              href="https://t.me/alizabetpoor"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Ali on Telegram (opens in a new tab)"
+              className="text-studio-white underline decoration-white/40 underline-offset-4 transition-colors hover:decoration-white"
+            >
+              Ali
+            </a>
+          </p>
           <p className="mt-5 font-mono text-xs uppercase text-studio-muted sm:text-sm xl:text-[0.55rem]">
             PAUSE STUDIO · ALL RIGHTS RESERVED
           </p>

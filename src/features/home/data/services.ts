@@ -1,7 +1,15 @@
-import { SectionIntro } from "@/components/studio/section-intro";
-import { ServiceCard } from "@/components/studio/service-card";
+import type { ImageProps } from "next/image";
 
-const services = [
+export type Service = {
+  number: string;
+  title: string;
+  description: string;
+  image: ImageProps["src"];
+  imageAlt: string;
+  phase?: string;
+};
+
+export const services: Service[] = [
   {
     number: "01",
     title: "Architectural Design",
@@ -40,7 +48,7 @@ const services = [
     number: "05",
     title: "Architectural Graphics",
     description:
-      "We develop projects into precise construction drawings, technical details and coordinated documentation for execution.",
+      "We use architectural graphics to communicate design ideas and project information clearly.",
     image: "/assets/figma/img51.png",
     imageAlt: "Architectural graphic study",
   },
@@ -53,31 +61,3 @@ const services = [
     imageAlt: "Landscape design study",
   },
 ];
-
-export function ServicesSection() {
-  return (
-    <section id="services" className="studio-container pt-12 sm:pt-20">
-      <SectionIntro
-        title="What We Do"
-        description="We bring together architecture, technical design, visualization and visual communication to shape projects from the first idea to the final experience."
-        descriptionClassName="text-[0.7rem] sm:text-base"
-      />
-      <div className="mt-6 grid grid-cols-2 gap-x-2 gap-y-2 sm:mt-10 sm:gap-x-3 sm:gap-y-4 xl:mt-16 xl:grid-cols-[repeat(3,minmax(0,304px))] xl:justify-between xl:gap-y-[3.25rem]">
-        {services.map((service) => (
-          <ServiceCard
-            key={service.number}
-            {...service}
-            className={
-              service.number === "05"
-                ? "order-6 xl:order-5"
-                : service.number === "06"
-                  ? "order-5 xl:order-6"
-                  : undefined
-            }
-            maskImage="/assets/figma/img11.svg"
-          />
-        ))}
-      </div>
-    </section>
-  );
-}

@@ -1,10 +1,7 @@
 import Image from "next/image";
-import { BrandMark } from "@/components/studio/brand-mark";
-
-type SiteNavLink = {
-  label: string;
-  href: string;
-};
+import { BrandMark } from "@/components/ui/brand-mark";
+import type { SiteNavLink } from "@/components/layout/site-navigation";
+import { MobileNavigation } from "@/components/layout/mobile-navigation";
 
 type SiteHeaderProps = {
   links: SiteNavLink[];
@@ -54,14 +51,7 @@ export function SiteHeader({ links }: SiteHeaderProps) {
           height={24}
           className="hidden h-6 w-[97px] sm:block"
         />
-        <span
-          aria-hidden="true"
-          className="flex size-11 flex-col items-end justify-center gap-[5px] sm:hidden"
-        >
-          <span className="h-px w-7 bg-white" />
-          <span className="h-px w-5 bg-white" />
-          <span className="h-px w-7 bg-white" />
-        </span>
+        <MobileNavigation links={links} />
       </div>
     </header>
   );

@@ -1,15 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ProjectCard } from "@/components/studio/project-card";
-
-export type Project = {
-  title: string;
-  location: string;
-  year: string;
-  image: string;
-  imageAlt: string;
-};
+import { ProjectCard } from "@/features/home/sections/projects/project-card";
+import type { Project } from "@/features/home/data/projects";
 
 type ProjectCarouselProps = {
   projects: Project[];

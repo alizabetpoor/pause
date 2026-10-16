@@ -1,14 +1,10 @@
 import Image from "next/image";
 import type { ImageProps } from "next/image";
+import type { Service } from "@/features/home/data/services";
 
-type ServiceCardProps = {
-  number: string;
-  title: string;
-  description: string;
+type ServiceCardProps = Omit<Service, "image"> & {
   image: ImageProps["src"];
-  imageAlt: string;
   maskImage?: string;
-  phase?: string;
   className?: string;
 };
 

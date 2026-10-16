@@ -2,11 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-export type ExplorationStudy = {
-  image: string;
-  alt: string;
-};
+import type { ExplorationStudy } from "@/features/home/data/exploration-studies";
 
 type ExplorationCarouselProps = {
   studies: ExplorationStudy[];

@@ -45,6 +45,10 @@ body {
   margin-inline: auto;
 }
 
+.persian-copy {
+  font-family: Tahoma, Arial, sans-serif;
+}
+
 @media (min-width: 640px) {
   .studio-container {
     width: calc(100% - 4rem);

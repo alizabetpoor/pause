@@ -1,12 +1,9 @@
 import Image from "next/image";
 import type { ImageProps } from "next/image";
+import type { Project } from "@/features/home/data/projects";
 
-type ProjectCardProps = {
-  title: string;
-  location: string;
-  year: string;
+type ProjectCardProps = Omit<Project, "image"> & {
   image: ImageProps["src"];
-  imageAlt: string;
   maskImage?: string;
   className?: string;
 };

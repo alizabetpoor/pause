@@ -1,25 +1,16 @@
 import Image from "next/image";
-import { ExplorationCarousel } from "@/components/studio/exploration-carousel";
-import { SectionIntro } from "@/components/studio/section-intro";
-import { TextLink } from "@/components/studio/text-link";
-
-const explorationStudies = [
-  { image: "imgRectangle16.png", alt: "Conference hall spatial study" },
-  { image: "imgRectangle14.png", alt: "Conference hall material study" },
-  { image: "imgRectangle13.png", alt: "Cafe interior sketch study" },
-  { image: "imgRectangle15.png", alt: "Conference hall lighting study" },
-];
-
-const desktopPositions = [
-  "left-0 top-0",
-  "left-[440px] top-[240px]",
-  "left-0 top-[638px]",
-  "left-[440px] top-[867px]",
-];
+import { ExplorationCarousel } from "@/features/home/sections/about/exploration-carousel";
+import { SectionIntro } from "@/components/ui/section-intro";
+import { TextLink } from "@/components/ui/text-link";
+import {
+  desktopStudyPositions,
+  explorationStudies,
+} from "@/features/home/data/exploration-studies";
+import { studioProfile } from "@/lib/seo/studio-config";
 
 function VerticalTitle({ className }: { className: string }) {
   return (
-    <div aria-label="Design Exploration" className={className}>
+    <div aria-hidden="true" className={className}>
       <span className="flex flex-col">
         {"DESIGN".split("").map((letter, index) => (
           <span key={`${letter}-${index}`}>{letter}</span>
@@ -60,6 +51,13 @@ export function AboutSection() {
         descriptionClassName="text-sm sm:text-xl xl:text-lg"
         className="mt-0 xl:mt-20"
       />
+      <p
+        lang="fa"
+        dir="rtl"
+        className="persian-copy mx-auto mt-3 max-w-4xl text-center text-sm leading-7 text-studio-muted sm:text-base"
+      >
+        {studioProfile.descriptionFa}
+      </p>
 
       <div
         aria-hidden="true"
@@ -88,7 +86,7 @@ export function AboutSection() {
             {explorationStudies.map((study, index) => (
               <article
                 key={study.image}
-                className={`absolute h-[609px] w-[410px] overflow-hidden rounded-[30px] border border-white/60 ${desktopPositions[index]}`}
+                className={`absolute h-[609px] w-[410px] overflow-hidden rounded-[30px] border border-white/60 ${desktopStudyPositions[index]}`}
               >
                 <Image
                   src={`/assets/figma/${study.image}`}
