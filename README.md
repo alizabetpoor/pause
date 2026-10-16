@@ -39,7 +39,11 @@ Keep project and service claims grounded in the existing work. Add a detail rout
 
 ## Production domain
 
-Set `SITE_URL` to the verified HTTPS site origin in the production build environment before `npm run build`. It supplies the canonical URL, sitemap URL, structured-data website URL, and absolute social metadata. Without a valid configured URL, those absolute URLs and social preview images are omitted. No `.env` file is committed because the actual production domain has not been provided.
+Set `SITE_URL` to the verified HTTPS site origin in the production build environment before `npm run build`. It supplies the canonical URL, sitemap URL, structured-data website URL, and absolute social metadata. Without a valid configured URL, those absolute URLs and social preview images are omitted. Local `.env` is ignored by Git and Docker; `.env.example` documents the values without secrets. Production uses the Actions Variable `SITE_URL` so it is embedded during the GitHub-hosted build.
+
+## Production deployment
+
+The `deploy` branch CI/CD workflow builds and smoke-tests the standalone Docker image on GitHub-hosted runners, publishes an immutable commit SHA tag to GHCR, then deploys that exact image over verified SSH. The VPS does not build the application. See [`docs/deployment.md`](docs/deployment.md) for the required GitHub settings, first-time VPS setup, health checks, rollback, and troubleshooting.
 
 ## Run and verify
 
