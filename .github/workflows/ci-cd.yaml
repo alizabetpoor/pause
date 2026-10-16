@@ -76,6 +76,19 @@ jobs:
           echo "Production container did not respond within 60 seconds." >&2
           exit 1
 
+      - name: Validate production Compose and Caddy configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          export SITE_DOMAIN=validation.invalid
+          export GHCR_IMAGE=ghcr.io/validation/pause
+          export IMAGE_TAG=sha-0000000000000000000000000000000000000000
+          docker compose -f compose.production.yaml config --quiet
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            --env SITE_DOMAIN \
+            caddy:2-alpine validate --config /etc/caddy/Caddyfile --adapter caddyfile
+
   publish:
     name: Build and publish immutable GHCR image
     if: github.event_name == 'push' && github.ref == 'refs/heads/deploy'
@@ -213,9 +226,10 @@ jobs:
           [[ -f "$app_dir/.env" ]] || { echo "Production .env is missing in $app_dir. Create it before deploying." >&2; exit 1; }
           command -v docker >/dev/null || { echo "Docker is unavailable to the SSH deployment user." >&2; exit 1; }
           docker compose version >/dev/null 2>&1 || { echo "Docker Compose v2 is required." >&2; exit 1; }
+          mkdir -p "$app_dir/caddy"
           REMOTE
 
-      - name: Transfer only production Compose and deployment script
+      - name: Transfer production Compose, Caddyfile, and deployment script
         shell: bash
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -227,6 +241,7 @@ jobs:
           ssh_dir="$RUNNER_TEMP/pause-deploy-ssh"
           ssh_options=(-P "$VPS_PORT" -i "$ssh_dir/id_ed25519" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$ssh_dir/known_hosts")
           scp "${ssh_options[@]}" compose.production.yaml deploy/deploy.sh "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/"
+          scp "${ssh_options[@]}" caddy/Caddyfile "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/caddy/Caddyfile"
 
       - name: Deploy exact published image and verify health
         shell: bash

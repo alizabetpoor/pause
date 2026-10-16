@@ -43,7 +43,7 @@ Set `SITE_URL` to the verified HTTPS site origin in the production build environ
 
 ## Production deployment
 
-The `deploy` branch CI/CD workflow builds and smoke-tests the standalone Docker image on GitHub-hosted runners, publishes an immutable commit SHA tag to GHCR, then deploys that exact image over verified SSH. The VPS does not build the application. See [`docs/deployment.md`](docs/deployment.md) for the required GitHub settings, first-time VPS setup, health checks, rollback, and troubleshooting.
+The `deploy` branch CI/CD workflow builds and smoke-tests the standalone Docker image on GitHub-hosted runners, publishes an immutable commit SHA tag to GHCR, then deploys that exact image over verified SSH. Caddy terminates HTTPS on ports 80/443 and proxies privately to `app:3000`; its certificates persist in named Docker volumes. The VPS does not build the application. Set the verified canonical origin as the GitHub Actions variable `SITE_URL` and the matching hostname as `SITE_DOMAIN` in the VPS app directory's private `.env`. See [`docs/deployment.md`](docs/deployment.md) for DNS/port prerequisites, first-time VPS setup, health checks, rollback, and troubleshooting.
 
 ## Run and verify
 

@@ -21,6 +21,7 @@ fail() {
 [[ -d "$APP_DIR" ]] || fail "Deployment directory does not exist: $APP_DIR. Create it during VPS setup first."
 [[ -f "$APP_DIR/.env" ]] || fail "Production .env is missing in $APP_DIR; create it without copying the repository's local .env."
 [[ -f "$APP_DIR/compose.production.yaml" ]] || fail "Production Compose file was not installed."
+[[ -f "$APP_DIR/caddy/Caddyfile" ]] || fail "Caddyfile was not installed in $APP_DIR/caddy/Caddyfile."
 command -v docker >/dev/null || fail "Docker is not installed or unavailable to this deployment user."
 docker compose version >/dev/null 2>&1 || fail "Docker Compose v2 is required on the VPS."
 
@@ -30,7 +31,7 @@ IMAGE_TAG="$NEW_TAG"
 export IMAGE_TAG
 
 docker compose -f compose.production.yaml config --quiet \
-  || fail "Compose configuration is invalid; check the deployment .env and transferred configuration."
+  || fail "Compose configuration is invalid. Set SITE_DOMAIN to the real public hostname in the VPS .env and check the transferred configuration."
 
 PREVIOUS_TAG=""
 STATE_FILE="$APP_DIR/.last-successful-image-tag"
@@ -51,7 +52,7 @@ if [[ -n "$running_id" ]]; then
 fi
 
 wait_until_healthy() {
-  if ! docker compose -f compose.production.yaml up --detach --no-build --wait --wait-timeout 120 app; then
+  if ! docker compose -f compose.production.yaml up --detach --no-build --wait --wait-timeout 120; then
     return 1
   fi
 
@@ -70,7 +71,10 @@ wait_until_healthy() {
 }
 
 printf 'Pulling %s:%s\n' "$GHCR_IMAGE" "$NEW_TAG"
-docker compose -f compose.production.yaml pull app
+docker compose -f compose.production.yaml pull
+docker compose -f compose.production.yaml run --rm --no-deps caddy \
+  validate --config /etc/caddy/Caddyfile --adapter caddyfile \
+  || fail "Caddy rejected its configuration; no services were replaced. Check SITE_DOMAIN and caddy/Caddyfile."
 
 if wait_until_healthy; then
   state_tmp="$STATE_FILE.tmp.$$"
@@ -82,6 +86,7 @@ fi
 
 printf 'New deployment failed its health check. Recent application logs follow.\n' >&2
 docker compose -f compose.production.yaml logs --tail 100 app >&2 || true
+docker compose -f compose.production.yaml logs --tail 100 caddy >&2 || true
 
 if [[ -n "$PREVIOUS_TAG" ]]; then
   printf 'Attempting rollback to %s:%s\n' "$GHCR_IMAGE" "$PREVIOUS_TAG" >&2
@@ -92,6 +97,7 @@ if [[ -n "$PREVIOUS_TAG" ]]; then
   else
     printf 'Rollback failed. Previous image tag: %s. Inspect Docker and application logs.\n' "$PREVIOUS_TAG" >&2
     docker compose -f compose.production.yaml logs --tail 100 app >&2 || true
+    docker compose -f compose.production.yaml logs --tail 100 caddy >&2 || true
   fi
 else
   printf 'No previous successful image is available for rollback. Removing only the failed app service.\n' >&2

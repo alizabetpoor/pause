@@ -14,8 +14,8 @@ Next's local deployment guide distinguishes full-featured Docker/Node hosting fr
 
 1. Both events run `npm ci`, ESLint, TypeScript, `next build`, a GitHub-hosted Docker build, and a bounded HTTP smoke check against the container. No test script exists in `package.json`, so the workflow does not invent one.
 2. Only a push to `deploy` can publish. That job requires `SITE_URL` and `IMAGE_PLATFORM`, logs in to GHCR with the job-scoped `GITHUB_TOKEN`, builds the production image with Buildx/QEMU, and publishes the immutable `sha-<full-commit-sha>` tag. BuildKit's GitHub Actions cache is used. The workflow inspects the pushed tag before allowing deployment to proceed.
-3. The deploy job uses SSH with strict host-key checking, checks the VPS directory, `.env`, Docker, and Compose, and transfers only `compose.production.yaml` and `deploy/deploy.sh`. It pulls and runs the exact image tag from the preceding job using `docker compose up --no-build`.
-4. Compose waits for the HTTP health check. On failure the script prints bounded app logs and attempts to restore the previous successful immutable tag. A first deployment with no previous image is cleaned up only for this app service. The deployment exits unsuccessfully even if rollback succeeds, so the failed release remains visible in Actions.
+3. CI also renders the production Compose file and validates `caddy/Caddyfile` using the official `caddy:2-alpine` image with a reserved validation-only hostname. The deploy job uses SSH with strict host-key checking, checks the VPS directory, `.env`, Docker, and Compose, creates the Caddy config directory, and transfers `compose.production.yaml`, `caddy/Caddyfile`, and `deploy/deploy.sh`. It never transfers or overwrites `.env`.
+4. The VPS pulls the exact GHCR image tag from the preceding job and the official Caddy image, validates Caddy's config, then runs `docker compose up --no-build --wait`. Caddy's health check validates its configuration; the Next.js container retains its HTTP health check. After first deployment, verify the public hostname over HTTPS from outside the VPS to confirm DNS, firewall, and ACME issuance. On failure the script prints bounded app and Caddy logs and attempts to restore the previous successful immutable tag. The deployment exits unsuccessfully even if rollback succeeds, so the failed release remains visible in Actions.
 
 Workflow actions are pinned to full commit SHAs. Pull requests do not receive SSH secrets or package-write permission. Workflow concurrency serializes runs for the same branch; a deploy cannot be superseded mid-flight by another run.
 
@@ -26,10 +26,10 @@ Workflow actions are pinned to full commit SHAs. Pull requests do not receive SS
 | Name | Where | Required | Purpose |
 |---|---|---:|---|
 | `SITE_URL` | Local `.env`; GitHub Actions **Variable** for production | Required for deployment; optional locally | Verified HTTPS origin used at build time for canonical metadata, sitemap, robots and absolute social/structured-data URLs. It is public configuration, not a secret. Changing it requires rebuilding the image. The workflow rejects a missing value. |
-| `APP_PORT` | `.env` on the VPS | Optional (defaults to `3000`) | Host loopback port exposed to an existing reverse proxy. It is Compose configuration and is not passed to the Next.js process. |
+| `SITE_DOMAIN` | `.env` on the VPS | Required | Real public hostname served by Caddy. Caddy uses it for automatic HTTPS. This server-side setting is not passed to Next.js; do not use the `.env.example` placeholder. |
 | `IMAGE_PLATFORM` | GitHub Actions **Variable** | Required for publishing | Target Docker platform, exactly `linux/amd64` or `linux/arm64`. Set it to match `uname -m` on the VPS (`x86_64` → `linux/amd64`, `aarch64` → `linux/arm64`). The QEMU builder supports the configured cross-platform build. |
 
-There are no `NEXT_PUBLIC_*` variables and no required application runtime secrets. `SITE_URL` is read while Next statically generates the homepage metadata and sitemap, so setting it only in the VPS `.env` cannot update the image. It is provided to the GitHub build instead. The example file documents these variables; `.env` is ignored by Git and Docker. The local `.env` contains only blank `SITE_URL` and a safe local `APP_PORT` default.
+There are no `NEXT_PUBLIC_*` variables and no required application runtime secrets. `SITE_URL` is read while Next statically generates the homepage metadata and sitemap, so setting it only in the VPS `.env` cannot update the image. It is provided to the GitHub build instead. Set `SITE_URL` and `SITE_DOMAIN` to the same canonical origin/hostname in their respective GitHub and VPS configuration. The example file documents these variables; `.env` is ignored by Git and Docker. `APP_PORT` is no longer used: Next.js is reachable only on the Compose network at `app:3000`.
 
 ### GitHub Actions Variables
 
@@ -59,13 +59,13 @@ Create these under **Repository → Settings → Secrets and variables → Actio
 
 1. Add and protect the `deploy` branch according to your merge policy. Push this configuration to that branch (or open a PR targeting it) after reviewing it.
 2. Inspect the VPS architecture with `uname -m`, then set `IMAGE_PLATFORM` as above.
-3. Set `SITE_URL` to the verified production origin and set `VPS_APP_DIR`/SSH settings in GitHub. Deployment will fail closed until these settings are valid.
+3. Set `SITE_URL` to the verified production origin and set `VPS_APP_DIR`/SSH settings in GitHub. Set `SITE_DOMAIN` to the matching hostname in the VPS `.env`. Deployment will fail closed until the required values are valid.
 4. Add `VPS_HOST`, `VPS_USER`, `VPS_SSH_PRIVATE_KEY`, and verified `VPS_KNOWN_HOSTS` secrets. Set `VPS_PORT` only if SSH does not use port 22.
 5. In the repository's **Actions** settings, allow GitHub Actions to create and write packages. The workflow grants only the job-scoped `packages: write` permission.
 
 ## First-time VPS setup
 
-Perform these steps from the VPS console or a trusted administrative SSH session. The deployment workflow does not install Docker, change firewall rules, edit DNS/TLS/Nginx, or stop unrelated services.
+Perform these steps from the VPS console or a trusted administrative SSH session. The deployment workflow does not install Docker, change firewall rules or DNS, or stop unrelated services.
 
 1. Install a maintained Docker Engine and Docker Compose v2 using the VPS distribution's official instructions. Create a dedicated deployment user. On Debian/Ubuntu, for example:
 
@@ -82,16 +82,16 @@ Perform these steps from the VPS console or a trusted administrative SSH session
    ```
 
    Add only `pause-deploy.pub` to the deployment user's `~/.ssh/authorized_keys`, with `.ssh` mode `700` and `authorized_keys` mode `600`. Save the private key file as the GitHub Secret `VPS_SSH_PRIVATE_KEY`. Do not add it to the repository, share it here, or reuse a personal login key.
-3. Create the deployment directory and its private Compose environment file. Example (replace the directory with the same value configured as `VPS_APP_DIR`):
+3. Point the canonical hostname's DNS A record (and AAAA record only if IPv6 reaches this VPS) to the server. Confirm inbound TCP 80 and 443 are permitted and not already occupied by another service. Caddy needs public reachability on those ports for ACME certificate issuance and renewal. The deployment does not change DNS, firewall rules, or existing proxies; resolve any port conflict deliberately before switching traffic.
+4. Create the deployment directory and its private Compose environment file. Example (replace the directory and hostname with your real configured values):
 
    ```sh
    sudo install -d -o pause-deploy -g pause-deploy -m 0750 /opt/pause
-   sudo -u pause-deploy sh -c 'umask 077; printf "%s\n" "APP_PORT=3000" > /opt/pause/.env'
+   sudo -u pause-deploy sh -c 'umask 077; printf "%s\n" "SITE_DOMAIN=your-verified-domain" > /opt/pause/.env'
    sudo chmod 600 /opt/pause/.env
    ```
 
-   This file is independent of the checkout's local `.env`; deployment does not copy or overwrite it. No Next.js runtime variable is currently required. `APP_PORT` is optional and defaults to 3000.
-4. Make sure the configured reverse proxy can connect to `127.0.0.1:APP_PORT` on the host, and ensure its existing HTTPS/domain configuration is already valid. The Compose service intentionally binds to loopback and does not publish the Next.js port to the public interface.
+   This file is independent of the checkout's local `.env`; deployment does not copy or overwrite it. `SITE_DOMAIN` must be the real public hostname; do not use the `.env.example` placeholder.
 5. Verify the SSH host key against a trusted VPS console fingerprint. Store its exact line in `VPS_KNOWN_HOSTS`; do not trust an unverified `ssh-keyscan` result. If you use `ssh-keyscan` to collect the public key, compare its fingerprint with the VPS provider console before adding it to the secret.
 6. Choose GHCR image visibility:
    - **Public package:** GHCR permits anonymous image pulls, so no GHCR credential is needed on the VPS.
@@ -110,7 +110,7 @@ Perform these steps from the VPS console or a trusted administrative SSH session
 
    Run this only on the VPS as the deployment user. Do not paste the token into chat, source control, or a GitHub Actions log.
 
-The first image is deployed by the first successful push/merge to `deploy` after configuration. No prior image exists for rollback on that first deployment; later deploys retain their last successful immutable tag in `.last-successful-image-tag`.
+The first image is deployed by the first successful push/merge to `deploy` after configuration. No prior image exists for rollback on that first deployment; later deploys retain their last successful immutable tag in `.last-successful-image-tag`. Caddy's certificate and runtime state live in the named `caddy_data` and `caddy_config` volumes. Routine deployment does not delete them; do not add `down -v` or volume pruning to this workflow.
 
 ## Inspect, rollback, and troubleshoot
 
@@ -119,6 +119,8 @@ Run these on the VPS from `VPS_APP_DIR` as the deployment user:
 ```sh
 docker compose -f compose.production.yaml ps
 docker compose -f compose.production.yaml logs --tail 100 app
+docker compose -f compose.production.yaml logs --tail 100 caddy
+docker compose -f compose.production.yaml exec caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 docker inspect --format '{{.Config.Image}} {{.State.Health.Status}}' "$(docker compose -f compose.production.yaml ps -q app)"
 cat .last-successful-image-tag
 ```
@@ -135,10 +137,11 @@ Replace the placeholder with the chosen older tag. Never run `docker compose bui
 Common failures:
 
 - **Missing `SITE_URL` / `IMAGE_PLATFORM`:** set the GitHub Actions Variables; the publisher fails before SSH if either is absent or invalid.
+- **Missing or incorrect `SITE_DOMAIN`:** set the real public hostname in the VPS app directory's `.env`. Verify its DNS and inbound TCP 80/443 reach this VPS; never copy `.env.example` as production configuration.
 - **SSH host-key error:** verify the current host fingerprint out-of-band and update `VPS_KNOWN_HOSTS`. Do not disable strict checking.
 - **Remote directory or `.env` error:** create the directory and its own file as described above; deployment intentionally refuses to invent or overwrite runtime configuration.
 - **GHCR denied:** confirm the package is public or re-run the VPS's one-time read-only registry login, and make sure that GitHub account can read this package.
-- **Port or proxy issue:** inspect the Compose health/log output and confirm the reverse proxy targets `127.0.0.1:APP_PORT`.
+- **HTTPS or certificate issue:** inspect Caddy logs, verify `SITE_DOMAIN` DNS records and inbound TCP ports 80/443, and check for another service occupying those ports. UDP 443 is published for HTTP/3 where supported; TCP 80/443 provide HTTP and HTTPS.
 - **Architecture mismatch:** compare VPS `uname -m` with `IMAGE_PLATFORM`, update the variable, and publish a new commit.
 - **Workflow/package permission error:** verify Actions package write is enabled and the publishing job has not been restricted by organization policy.
 
